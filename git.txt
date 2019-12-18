@@ -1,0 +1,124 @@
+Поток снимков миниатюрной файловой системы (stream of snapshots). На любое действие вычисляется hash. 
+
+- tracked (отслеживаемые)
+- untracked (неотслеживаемые)
+
+3 состояния файлов tracked:
+- изменённое (modified)
+файлы, которые поменялись, но ещё не были зафиксированы
+
+- индексированное (staged)
+изменённые файлы, отмеченные для включения в следующий коммит
+
+- зафиксированное (committed)
+файл уже сохранён в вашей локальной базе и git directory
+
+Внесли изменение в file -> он стал измененный modified -> сделали git add file -> он стал проиндексированный staged -> сделали git commit file -> он стал зафиксированный committed
+
+1) Working directory - локальная папка на ПК
+2) Staging area (или "индекс")
+хранит информацию о том, какие изменения попадут в следующий коммит
+3) .git directory
+
+Базовый подход в работе с Git выглядит так:
+- Вы изменяете файлы в вашей рабочей директории.
+- Вы выборочно добавляете в индекс только те изменения, которые должны попасть в следующий коммит, добавляя тем самым снимки только этих изменений в область подготовленных файлов.
+- Когда вы делаете коммит, используются файлы из индекса как есть, и этот снимок сохраняется в вашу Git-директорию.
+
+--- Начало работы с проектом в Git
+1) импорт в Git существующего проекта или директории (с локального диска) = git init
+2) клонирование существующего репозитория с другого сервера = git clone
+
+--- Настройка конфигурации
+git config --global user.name "John Doe"
+git config --global user.email johndoe@example.com
+git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short" = алиас git hist для расширенного log
+git config --global core.editor "code --wait" = установка VS Code editor по умолчанию
+
+git config --list
+-h - ключ хэлпа
+
+git status = текущее состояние
+
+git log (q для выхода) = история по ветке
+git log --all = история по всем веткам
+git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short = история изменений
+git hist --all
+
+LINUX
+
+cat hello.html = показать содержимое файла
+mkdir lib = создать директорию
+ls -1 имя_папки = список файлов в формате дерева
+touch lib/style.css = создать пустой файл style.css
+cd ../hello = на уровень ниже и потом в папку hello
+dir / tree
+echo 'My Project' > README = создаем файл README с текстом 'My Project'
+rm file_name = удаление файла
+
+--------------------------------------------------
+
+Перемещение между коммитами 
+1) по HEAD
+HEAD - текущий коммит
+HEAD^ - смещение текущего коммита на -1
+HEAD^^ = HEAD~2 - смещение текущего коммита на -2
+2) по хэшу
+3) по тэгу
+
+git init - > создаем папку .git = создаем репозиторий
+
+---Клонирование репозитория
+git clone https://github.com/libgit2/libgit2 myrepo
+аналогично mkdir myrepo + cd ../myrepo + git init + git remote add origin https://github.com/libgit2/libgit2 + git pull origin master
+
+git add file_name / git add . = индексируем изменения в файле (делает снимок различий-хэш изменений)
+git commit -m "Add an author" = комитим (сохранение) изменений 
+git commit -a -m "Add an author" = add + commit для modified (для untracked add + commit)
+git commit --amend = изменить последний коммит (без создания нового)
+
+git diff = изменения в modified файлах
+git diff --staged = изменения в staged файлах
+git diff hash = изменения между текущим состоянием и состоянием по хэшу
+
+--- Перемещение между коммитами и ветками (git checkout)
+git checkout <hash>, tag, HEAD или branch) = изменения, сделанные в точке перемещения, не сохраняются! для этого делаем новую ветку
+git checkout master = перейти к актуальной ветке
+git checkout -b style = создаем новую ветку style
+
+--- Сброс проекта к заданному снимку (git reset)
+git reset --soft (staged) --mixed (unstaged) --hard (удаляет) commit (хэш, тэг или head в нужном статусе)
+git reset = git reset --mixed HEAD
+
+--- Удаление untracked файлов
+git clean -f
+
+--- Тэги
+git tag v1 = тэг текущего состояния
+git tag -a v1.4 -m 'my version 1.4' hash = имя тэга v1.4, комментарий my version 1.4
+git tag = показать все тэги
+тэги не пушатся, пуш тэгов отдельной командой git push origin --tags
+
+--- Удаленный репозиторий
+1) git remote add origin https://github.com/borderum/FirstRepository.git = задать как источник (origin) удаленный репозиторий по адресу
+   git remote -v = состояние удаленного репозитория
+2) git push origin master = добавить локальный репозиторий master в удаленный репозиторий origin (заданный в п.1)
+2) git pull origin master = вытянуть удаленный origin (заданный в п.1) в локальный master
+git pull origin master = git fetch (скачать содержимое origin в локальный мастер без актуализации) + git merge origin master (слить master на сервера с master локальным)
+
+--- Ветвление
+master = локальная "главная" ветка
+origin/master = ветка master на ориджине Github 
+
+git branch = информация по имеющимся веткам
+git branch add-feature1 = добавляем ветку add-feature1
+git checkout add-feature1 = переход в ветку add-feature1
+(из ветки master) git merge add-feature1 = слияние веток master и add-feature1
+git branch -d add-feature1 = уделение ветки add-feature1 (удаляются только слитые merged ветки, неслитые удалять с параметром -D)
+
+
+git rm --cached file_name = переводит файл в untracked
+Ctrl-Z = git restore file_name
+git revert HEAD --no-edit = откатить последний коммит
+git mv hello.html lib = перемещение файла в папку lib
+git merge master = объеденить ветки
