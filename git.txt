@@ -68,14 +68,27 @@ HEAD^^ = HEAD~2 - смещение текущего коммита на -2
 
 git init - > создаем папку .git = создаем репозиторий
 
----Клонирование репозитория
+--- Клонирование репозитория
 git clone https://github.com/libgit2/libgit2 myrepo
 аналогично mkdir myrepo + cd ../myrepo + git init + git remote add origin https://github.com/libgit2/libgit2 + git pull origin master
 
+--- Индексирование и исключения
+Если нужно индексировать пустую папку то создаем в ней пустой файл .gitkeep
+Локальный gitignore = в корне проекта создать .gitignore и вписать имя папки или файла ignored_folder (индекс внутри игнора = git add -f ignored_folder/file.name)
+Глобальный gitignore = git config --global core.excludesfile %USERPROFILE%\.gitignore
+code %USERPROFILE%\.gitignore
+
 git add file_name / git add . = индексируем изменения в файле (делает снимок различий-хэш изменений)
-git commit -m "Add an author" = комитим (сохранение) изменений 
-git commit -a -m "Add an author" = add + commit для modified (для untracked add + commit)
+git add -A - проиндексировать все файлы на всех уровнях вложений
+
+Атомарность коммитов
+git commit -m "Comment" = комитим (сохранение) изменений 
+git commit -a -m "Comment" = add + commit для modified файлов (для новых untracked файлов нужно add + commit)
+git commit -m "Comment" file_name = add + commit для modified по четко указанному пути
 git commit --amend = изменить последний коммит (без создания нового)
+
+--- Инфо по коммитам
+git show хэш --pretty=fuller
 
 git diff = изменения в modified файлах
 git diff --staged = изменения в staged файлах
@@ -116,9 +129,10 @@ git checkout add-feature1 = переход в ветку add-feature1
 (из ветки master) git merge add-feature1 = слияние веток master и add-feature1
 git branch -d add-feature1 = уделение ветки add-feature1 (удаляются только слитые merged ветки, неслитые удалять с параметром -D)
 
-
-git rm --cached file_name = переводит файл в untracked
+git rm file_name = физически удалить файл
+git rm --cached file_name = переводит файл в untracked (удаляем из индекса)
 Ctrl-Z = git restore file_name
 git revert HEAD --no-edit = откатить последний коммит
+git mv index.html hello.html = переименование index в hello
 git mv hello.html lib = перемещение файла в папку lib
 git merge master = объеденить ветки
